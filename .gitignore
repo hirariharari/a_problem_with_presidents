@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 #LaTeX stuff
-.tex
-.synctex.gz
-.aux
-.log
+*.tex
+*.synctex.gz
+*.aux
+*.log
