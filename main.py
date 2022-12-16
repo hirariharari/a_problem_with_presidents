@@ -163,19 +163,3 @@ plt.xlabel('Status')
 plt.ylabel('No. of presidents')
 plt.savefig('plots/Status.png')
 plt.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
