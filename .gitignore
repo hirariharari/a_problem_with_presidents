@@ -133,3 +133,4 @@ dmypy.json
 *.synctex.gz
 *.aux
 *.log
+*.out
