@@ -11,12 +11,27 @@ from tabulate import tabulate
 #HELPER FUNCTIONS
 
 def get_ranked(df, sort_column, sort_flag, num_rows):
+    '''Sort dataframe according to parameters and display specified number of rows as result'''
     df = df.sort_values(sort_column, ascending=sort_flag).head(num_rows)
     df.reset_index(inplace=True, drop=True)
     return df
 
 def print_table(table, keys='keys'):
+    '''Tabulate dataframe with nice formatting'''
     print(tabulate(table, headers=keys, tablefmt='fancy_outline'))
+
+def plot_stats(df, flag):
+    '''Plot the statistics dataframe with scale in either days or years'''
+    if flag == 'years':
+        df = df.div(365.25, axis=0)
+
+    plt.figure()
+    ax = df.transpose().plot.bar(xlabel='Statistic', ylabel='Value (in {})'.format(flag), legend=None)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation = 0)
+    plt.axhline(y=df['mean'][0], color='r')
+    plt.legend(['Mean'])
+    plt.savefig('plots/Statistics_{}.png'.format(flag))
+    plt.close()
 
 #PRELIMINARY PROCESSING
 
@@ -67,7 +82,7 @@ longest_lived = get_ranked(df, 'lived_days', False, 10)
 shortest_lived = get_ranked(df, 'lived_days', True, 10)
 
 #print top 10 presidents
-columns_to_display = ['PRESIDENT', 'BIRTH DATE', 'DEATH DATE', 'lived_days']
+columns_to_display = ['PRESIDENT', 'BIRTH DATE', 'DEATH DATE', 'lived_days', 'lived_years']
 
 print('Top 10 longest lived presidents')
 print_table(longest_lived[columns_to_display])
@@ -98,8 +113,18 @@ w_avg = (df['lived_days'].sum() * w_i) / (w_i * df.shape[0])
 stats['weighted avg.'] = [w_avg]
 
 #print statistics table
-print('Statistics')
+print('Statistics (in days)')
 print_table(stats.transpose(), '')
+
+
+#print statistics (in years)
+stat_years = stats.copy()
+sty = stats.loc[:, stats.columns != 'mode(years)'].div(365.25)
+stat_years[sty.columns] = sty
+
+#print statistics table
+print('Statistics (in years)')
+print_table(stat_years.transpose(), '')
 
 
 #PLOTTING
@@ -113,14 +138,11 @@ stt['mode'] = stt['mode(years)'][0][0] * 365.25
 #drop mode(years)
 stt.drop('mode(years)', axis=1, inplace=True)
 
-#plot statistics as a bar graph
-plt.figure()
-ax = stt.transpose().plot.bar(xlabel='Statistic', ylabel='Value (in days)',legend=None)
-ax.set_xticklabels(ax.get_xticklabels(), rotation = 0)
-plt.axhline(y=stt['mean'][0], color='r')
-plt.legend(['Mean'])
-plt.savefig('plots/Statistics.png')
-plt.close()
+#plot statistics (in days) as a bar graph
+plot_stats(stt, 'days')
+
+#plot statistics (in years) as a bar graph
+plot_stats(stt, 'years')
 
 #get frequencies of president ages (years)
 plt.figure()
